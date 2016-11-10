@@ -1,0 +1,16 @@
+<grupo>
+	<nombre>Ascendancy</nombre>
+	<repositorio>https://jperezp2@bitbucket.org/jperezp2/backtolife.git</repositorio>
+	<miembro1>
+		<nombre>Juan David Pérez Pérez</nombre>
+		<codigo>201310024010</codigo>
+		<grupo>031</grupo>
+		<email>jperezp2@eafit.edu.co</email>
+	</miembro1>
+	<miembro2>
+		<nombre>Sergio Atehortua Ceferino</nombre>
+		<codigo>201310091010</codigo>
+		<grupo>031</grupo>
+		<email>satehor1@eafit.edu.co</email>
+	</miembro2>
+</grupo>

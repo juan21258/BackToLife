@@ -1,0 +1,2 @@
+ProcesoSui primerSuicida { /home/juan/pruebaos/src :: ProcesoSuicida 10 }
+ProcesoSui eternoSuicida { /home/juan/pruebaos/src :: TendenciasSuicidas 0 }

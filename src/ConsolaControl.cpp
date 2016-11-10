@@ -32,6 +32,35 @@ conctrl [--ficheroconfiguracion=<rutaficherocfg>]
 [--memoriacompartida=<id>]
 */
 
+
+
+/* Ya se almacenan y dividen los parametros de entrada
+	// inicio parser
+	string line;
+	vector<string>comando;
+	//char * div;
+	//istringstream iss;
+	int i = 0;
+
+	while(!cin.eof()){
+       cout << "conctrl>";
+       getline(cin,line);
+       //comando.push_back(line);
+       //cout << comando.at(i) << endl;
+       //div = strtok(line.c_str()," ");
+      	istringstream iss(line);
+ 		copy(istream_iterator<string>(iss),
+     	istream_iterator<string>(),
+     	back_inserter(comando));
+       	//cout << comando[] << endl;
+       	for(vector<string>::const_iterator i = comando.begin(); i != comando.end(); ++i){
+    		cout << *i << "\n";
+       	}
+    	comando.clear();
+   	}
+   	//fin parser
+*/
+
 //Enteros para el pipe
 int entrada = 0;
 int salida = 1;

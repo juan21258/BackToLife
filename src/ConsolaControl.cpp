@@ -94,18 +94,26 @@ struct SuicideProcessInfo
 
 //Estructura que contiene la informacion para las estadísticas de cada proceso suicida
 struct InfoMuerte {
-	long int seq;
+	string id;
 	int nDecesos;
 };
 
 //Estructura para la memoria compartida
+/*
+void *p = shmat(shmid,NULL,SHM_RDONLY);
+int *n = (int *)p;
+*p = n++;
+long *valSeq = (long *)p;
+p = valSeq++;
+InfoMuerte *InfoMuerte = (InfoMuerte *)p;
+*/
 struct MemoriaCompartida {
 	int n = 254; // Numero de procesos controladores
 	long int valSeq;
 	struct InfoMuerte muertes[254]; // Cada entrada identifica la información de los procesos suicidas.
+	//sizeof(int)+sizeof(long)+n*sizeof(InfoMuerte);
 };
 
-//sizeof(int)*2+sizeof(InfoMuerte)*n;
 
 //Contar lineas del txt
 int getLineCount(){

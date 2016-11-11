@@ -200,15 +200,27 @@ void *HiloConsola(void *id){
 }
 
 int main(int argc, char *argv[], char *env[]){
+	
 	int nprocesos;
 	string psuicida;
 	ifstream infile;
+	string ruta;
+	string semid;
+	string memoria;
 	//entrada de datos
 /*
 	if(argc == 4){
-		cout << "al menos sirve esto"<< endl;
-		nprocesos = getLineCount();
-		cout << nprocesos << endl;
+
+		string temp1 = argv[1];
+		string temp2 = argv[2];
+		string temp3 = argv[3];	
+
+		ruta    = temp1.substr(23,temp1.size());
+		semid   = temp2.substr(11,temp2.size());
+		memoria = temp3.substr(20,temp3.size());
+		cout << ruta << endl;
+		cout << semid << endl;
+		cout << memoria << endl;
 	}
 	else {
 		cout << "Modo de uso:"<< endl;	

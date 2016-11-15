@@ -1,4 +1,4 @@
-ProcesoSui eternoSuicida { /home/skp/suicidas :: ProcesoSuicida 110 }
-ProcesoSui segundoSuc { /home/skp/suicidas :: ProcesoSuicida 110 }
-ProcesoSui tercero { /home/skp/suicidas :: ProcesoSuicida 110 }
+ProcesoSui eternoSuicida { /home/juan/suicidas :: TendenciasSuicidas 0 }
+ProcesoSui primerSuicida { /home/juan/suicidas :: ProcesoSuicida 10 }
+ProcesoSui sndSuicida { /home/juan/suicidas :: ProcesoSuicida 10 }
 

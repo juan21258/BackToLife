@@ -98,53 +98,15 @@
 
 	//sizeof(int)*2+sizeof(InfoMuerte)*n;
 
-	//Contar lineas del txt
-	int getLineCount(){
-		FILE * file = fopen(PATH, "r");
-		if(file == NULL){
-			printf("El archivo no existe\n");
-			exit(EXIT_FAILURE);
-		}
-		int count = 0;
-		char line[200];
-		while(fgets(line,sizeof(line),file) != NULL){
-			if (line[0] != '\n'){
-				count++;
-			}
-		}
-		fclose(file);	
-		return count;
-	}
 
-	struct SuicideProcessInfo setSuicideInfo(char * line){
-		struct SuicideProcessInfo info;
-		char * tokensArray[5];
-		char * limite = "{}:";
-		char * token;
-		int index = 0;
-		token = strtok(line,limite);
-		while (token != NULL){
-			tokensArray[index] = token;
-			token = strtok(NULL, limite);
-			index++;
-		}
-		info.key = tokensArray[0];
-		info.id = tokensArray[1];
-		info.path = strcat(tokensArray[2],"/");
-		info.filename = tokensArray[3];
-		info.lifes = tokensArray[4];
-		return info;
-	}
-
-
-	void leerFichero(){
+	void leerFichero(string ruta){
 	  int i = 1;
 	  int j = 3; //Path
 	  int exec = 5;
 	  int k = 6;
 	  string infile;
 	  vector<string>param;
-	  ifstream myReadFile("FichCfg.txt");
+	  ifstream myReadFile(ruta);
 	  while (!myReadFile.eof()) {
 	  	getline(myReadFile,infile);
 	  	istringstream iss(infile);
@@ -358,12 +320,34 @@
 		int nprocesos;
 		string psuicida;
 		ifstream infile;
-		//entrada de datos
-	/*
-		if(argc == 4){
-			cout << "al menos sirve esto"<< endl;
-			nprocesos = getLineCount();
-			cout << nprocesos << endl;
+		//Consola control argumentos
+		string ruta = "./bin/conctrl.cfg";
+		string semid = "conctrlsem";
+		string memoria = "666";
+		string str_temp;
+		string str_temp2;
+		if(argc <= 4){
+			for(int i=0;i<argc;i++){
+				str_temp = argv[i];
+				str_temp2 = str_temp.substr(0,23); 
+				if(str_temp2 == "--ficheroconfiguracion="){
+					ruta = str_temp.substr(23,str_temp.size()); 
+				}
+			}
+			for(int i2=0;i2<argc;i2++){
+				str_temp = argv[i2];
+				str_temp2 = str_temp.substr(0,11); 
+				if(str_temp2 == "--semaforo="){
+					semid = str_temp.substr(11,str_temp.size()); 
+				}
+			}
+			for(int i3=0;i3<argc;i3++){
+				str_temp = argv[i3];
+				str_temp2 = str_temp.substr(0,10); 
+				if(str_temp2 == "--memoria="){
+					memoria = str_temp.substr(10,str_temp.size()); 
+				}
+			}
 		}
 		else {
 			cout << "Modo de uso:"<< endl;	
@@ -371,10 +355,9 @@
 			"[--semaforo=<id>][--memoriacompartida=<id>] " << endl;
 		}
 
-	*/
 		//TESTING
 
-		leerFichero();
+		leerFichero(ruta);
 		int nProcesos = idProcesos.size();
 		int pipes1[nProcesos][2];
 		int pipes2[nProcesos][2];

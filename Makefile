@@ -8,3 +8,5 @@ all:
 	g++ -o bin/ProcesoSuicida src/ProcesoSuicida.cpp   -std=c++11
 init:
 	mkdir bin
+	cp FichCfg.txt bin/FichCfg.txt
+	cp conctrl.cfg bin/conctrl.cfg

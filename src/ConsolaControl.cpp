@@ -62,6 +62,7 @@
 	int counter = 0;
 	bool end = false;
 	string mensaje = "";
+    int muertesControl = 0;
 	//Semaforo consola
 	sem_t mutexCon;
 
@@ -226,39 +227,11 @@
 		string strComando;
 		int test =0;
 		string strEstado;
-
+        string strInfinito;
 			
 		read(pipe2[0],&test,sizeof(test));
 		sem_post(&mutexPipe);
 		while(!murio){
-
-			// write(pipe1[1],&test,sizeof(test));
-			// sem_wait(&mutexCon);
-			// cerr << "TEST " << test << " TID " << tid << endl << flush;
-			// sem_post(&mutexCon);
-			// read(pipe2[0],&test,sizeof(test));
-			/*if(comandoHilos[tid].empty()){
-				comando = 0;
-				write(pipe1[1],&comando,sizeof(comando));
-				read(pipe2[0],&msg,sizeof(msg));	
-				if(msg==1){
-
-					read(pipe2[0],&exitStatus,sizeof(exitStatus));
-					int vidasRes;
-					read(pipe2[0],&vidasRes,sizeof(vidasRes));
-					sem_wait(&mutexCon);
-					mensaje = "Proceso "+to_string(tid)+" termino "+
-					to_string(exitStatus)+" vidas restantes "+to_string(vidasRes);
-					//cerr << mensaje << endl << flush;
-					sem_post(&mutexCon);
-				}else if(msg==2){
-					sem_wait(&mutexCon);
-					murio=true;
-					sem_post(&mutexCon);
-				}else if(msg==3){
-				}
-				//cerr << "sddddddd "  << msg << endl << flush;
-			}*/
 			
 			if(comandoHilos[tid].empty()){
 				comando = 0;
@@ -273,17 +246,16 @@
 					read(pipe2[0],&vidas,sizeof(vidas));
 					read(pipe2[0],&exitStatus,sizeof(exitStatus));
 					sem_wait(&mutexCon);
-					//cerr << "Proceso suicida " << idProcesos[tid] << " termino por causa: "
-					//<< exitStatus << " -- Proceso Control " << tid << " Vidas restantes: " << 
-					//vidas << endl;
+					cerr << "Proceso suicida " << idProcesos[tid] << " termino por causa: "
+					<< exitStatus << " -- Proceso Control " << tid << " Vidas restantes: " << 
+					vidas << endl;
 					sem_post(&mutexCon);
                 }else if(msg==2){
 					read(pipe2[0],&comando,sizeof(comando));
                 	sem_wait(&mutexCon);
                 	murio = true;
                 	cerr << "Proceso: "<<idProcesos[tid]<< " termino." << endl << flush;
-                	sem_post(&mutexCon);
-
+                    sem_post(&mutexCon);
                 }
 			}else{
 				sem_wait(&mutexCon);
@@ -301,11 +273,16 @@
 					}else{
 						strEstado="suspendido";
 					}
-					cerr << "Listar - Proceso: "<<idProcesos[tid]
-						 << " - Vidas: "<< vidas 
-						 << " - Estado: "<< strEstado 
-						 << endl << flush;
-					sem_post(&mutexCon);
+					if(vidas == 0){
+                        strInfinito = "infinitas";
+                    }else{
+                        strInfinito = to_string(vidas);
+                    }
+                    cerr << "Listar - Proceso: "<<idProcesos[tid]
+                         << " - Vidas: "<< strInfinito 
+                         << " - Estado: "<< strEstado 
+                         << endl << flush;
+                    sem_post(&mutexCon);
 					read(pipe2[0], &comando, sizeof(comando));
 				}else if(strComando=="sumar"){
 					comando = 2;
@@ -357,11 +334,11 @@
 		}
         int status;
         waitpid(idHijo,&status,0);
-		close(pipe1[0]);
-		close(pipe2[1]);
-		sem_wait(&mutexCon);
-		cerr << "Thread " << tid << " ended" << endl << flush;
-		sem_post(&mutexCon);
+		// close(pipe1[0]);
+		// close(pipe2[1]);
+        sem_wait(&mutexCon);
+        muertesControl++;
+        sem_post(&mutexCon);
 	}
 
 	int getTid(string cmd){

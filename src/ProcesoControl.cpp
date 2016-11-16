@@ -282,7 +282,6 @@ int main(int argc, char *argv[], char *env[]){
         }
     }
 
-    pthread_join(hiloControl, NULL);
     return 0;
 }
 

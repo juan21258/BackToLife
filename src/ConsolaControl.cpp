@@ -19,23 +19,16 @@
 	#include <sys/shm.h>
 	#include <errno.h>
 	#include <vector>
-
-	#include <iostream>
-	#include <fstream> 
-	#include <vector>
-	#include <stdio.h>
-	#include <string.h>
 	#include <iterator>
 	#include <sstream>
 	#include <algorithm>
 	#include <thread>
-
-
-	#define PATH ""
+	
+	const size_t n = 1024;
 	#define TRUE 1
 	#define SEM_NAME "/sem_valSeq"
 
-		using namespace std;
+	using namespace std;
 
 	/*
 	conctrl [--ficheroconfiguracion=<rutaficherocfg>]
@@ -73,6 +66,8 @@
 	sem_t mutexPipe;
 
 	sem_t semMensaje;
+
+
 	//Estructura que contiene la informacion del proceso suicida
 	struct SuicideProcessInfo
 	{
@@ -85,18 +80,28 @@
 
 	//Estructura que contiene la informacion para las estadísticas de cada proceso suicida
 	struct InfoMuerte {
-		long int seq;
+		string id;
 		int nDecesos;
+		int muertes[];
 	};
+
+	/*
+	void *p = shmat(shmid,NULL,SHM_RDONLY);
+	int *n = (int *)p;
+	*p = n++;
+	long *valSeq = (long *)p;
+	p = valSeq++;
+	InfoMuerte *InfoMuerte = (InfoMuerte *)p;
+
+	sizeof(int)+sizeof(long)+n*sizeof(InfoMuerte);
+	*/
 
 	//Estructura para la memoria compartida
 	struct MemoriaCompartida {
-		int n = 254; // Numero de procesos controladores
+		int n; // Numero de procesos controladores
 		long int valSeq;
 		struct InfoMuerte muertes[254]; // Cada entrada identifica la información de los procesos suicidas.
 	};
-
-	//sizeof(int)*2+sizeof(InfoMuerte)*n;
 
 
 	void leerFichero(string ruta){
@@ -295,12 +300,19 @@
 
 		}
         int status;
-        waitpid(idHijo,&status,0);
+        //waitpid(idHijo,&status,0);
 		// close(pipe1[0]);
 		// close(pipe2[1]);
+        waitpid(idHijo,&status,0);
         sem_wait(&mutexCon);
         muertesControl++;
+        if(muertesControl == comandoHilos.size()){
+        	cerr << "Todos los procesos han terminado. Presione enter para terminar"
+        	<< endl << flush;
+
+        }
         sem_post(&mutexCon);
+		
 	}
 
 	int getTid(string cmd){
@@ -313,11 +325,11 @@
 		return -1;
 	}
 
+	//int MemoriaCompartida::n = 254;
 
 
 	int main(int argc, char *argv[], char *env[]){
 
-		int nprocesos;
 		string psuicida;
 		ifstream infile;
 		//Consola control argumentos
@@ -417,12 +429,14 @@
     		}*/
     		//Parser consola
     		while(!cin.eof()){
+    			
     			cout << "conctrl>";
     			getline(cin,line);
     			istringstream iss(line);
     			copy(istream_iterator<string>(iss),
     				istream_iterator<string>(),
     				back_inserter(comando));
+    		if(comando.size()>1){		
     			if(comando.at(1)=="*"){
     				for (int i = 0; i < nProcesos; ++i){
     					sem_wait(&mutexCon);
@@ -445,8 +459,15 @@
     				comandoHilos[id].push_back(comando.at(0));
     				sem_post(&mutexCon);
     			}
+   			}
     			comando.clear();
+    			sem_wait(&mutexCon);
+    			if (muertesControl == nProcesos){
+    				break;
+    			}
+    			sem_post(&mutexCon);
     		}
+    		sem_post(&mutexCon);
     	}catch(int i){}
 	return 0;
 }

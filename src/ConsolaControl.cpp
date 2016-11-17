@@ -469,6 +469,10 @@
     		}
     		sem_post(&mutexCon);
     	}catch(int i){}
+
+    	for(int i=0; i < nProcesos; i++){
+    		t[i].join();
+    	}
 	return 0;
 }
 

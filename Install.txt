@@ -1,1 +1,45 @@
-Install
+Install:
+
+Descargar del repositorio en un directorio o ubicación deseada
+Link: https://jperezp2@bitbucket.org/jperezp2/backtolife.git
+
+Modo de uso:
+
+cd directorio/backtolife
+
+luego de estar en la carpeta del proyecto procedemos a iniciar el proyecto:
+
+Paso 1: Inicialización
+
+$ make init 
+
+Esto permite inicializar el directorio bin donde estaran ubicados los archivos de 
+configuración que contienen los identificadores de los suicidas, direcciones de ficheros
+del suicida y la cantidad de vidas del suicida
+
+--Estructura de fichero
+
+ProcesoSui ID { RUTAFICHERO :: Fichero NUMERO }
+
+Paso 2: Compilación
+
+$ make all
+
+Esto compila los ficheros del proyecto, los cuales son 3:
+ConsolaControl.cpp ProcesoControl.cpp ProcesoSuicida.cpp
+Los objetivos o ficheros .o estaran en el directorio bin, el cual fue previamente inicializado
+
+Paso 3: Ejecución
+
+estan ubicados en la carpeta backtolife, procederemos a realizar lo siguiente:
+
+$ ./bin/conctrl 
+
+Esto nos permite ejecutar la consola de control ubicada en el bin, si se ejecuta así utilizara un
+fichero de configuración por defecto, si se desea añadir uno se debe especificar
+
+$ ./bin/conctrl --ficheroconfiguracion=PATH
+
+Al finalizar si lo desea puede hacer uso de
+$ make clean 
+Esto para eliminar el directorio bin y sus componentes

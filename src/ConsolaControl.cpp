@@ -83,26 +83,6 @@
 		string id;
 		int nDecesos;
 		int muertes[];
-
-		int getnDecesos(){
-        	return nDecesos;
-    	}
-
-    	string getid(){
-    		return id;
-    	}
-    
-	    void setid(string n){
-	    	id = n;   
-	    }
-	    
-	    void setnDeceso(int n){
-	    	nDecesos = n;   
-	    }
-
-	    void setnDecesos(int n){
-	    	nDecesos = nDecesos + n;   
-	    }
 	};
 
 	/*
@@ -119,22 +99,8 @@
 	//Estructura para la memoria compartida
 	struct MemoriaCompartida {
 		int n; // Numero de procesos controladores
-		long int valSeq = 0;
-		struct InfoMuerte * muertess = NULL; 
-		
-		void MemoriaCompartidas(int val){
-			n = val;
-		    muertess = new struct InfoMuerte[val];
-		    //muertess[0].setnDecesos(3);
-		    //muertess[0].setid("Hola");
-		    //muertess[1].setnDecesos(4);
-		    //muertess[1].setid("Holasd");
-  		}
-  
-		long int getvalSeq(){return valSeq;} 
-		int getN(){return n;}
-		void setvalSeq(long int n){valSeq = n;}
-		void setN(int val){n = val;}
+		long int valSeq=0;
+		struct InfoMuerte muertes[1024]; // Cada entrada identifica la información de los procesos suicidas.
 	};
 
 	MemoriaCompartida cseg;
@@ -254,7 +220,6 @@
 					for(int i = 0;i < idProcesos.size();i++){
 						if(tid == i){
 							ind.at(i)++;
-							cseg.muertess[i].setnDecesos(1);
 						}
 					}
 					cseg.valSeq++;
@@ -352,8 +317,7 @@
         	
         	cerr << "Total muertes: " << cseg.valSeq << endl << flush;
         	for(int i=0;i<idProcesos.size();i++){
-        		cerr << "Muertes "<< cseg.muertess[i].getid() << ": "<< 
-        		cseg.muertess[i].getnDecesos() << endl <<flush;
+        		cerr << "Muertes "<< idProcesos.at(i) << ": "<< ind.at(i) << endl <<flush;
         	}
         	cerr << "Todos los procesos han terminado. Presione enter para terminar"
         	<< endl << flush;
@@ -419,12 +383,10 @@
 
 		leerFichero(ruta);
 		int nProcesos = idProcesos.size();
-		cseg.MemoriaCompartidas(nProcesos);
+		
 		for(int i=0;i<nProcesos;i++){
-			cseg.muertess[i].setid(idProcesos.at(i));
-			cseg.muertess[i].setnDeceso(0);
+			ind.push_back(0);
 		}
-
 		int pipes1[nProcesos][2];
 		int pipes2[nProcesos][2];
 		for (int i = 0; i < nProcesos; ++i)

@@ -25,34 +25,69 @@
 using namespace std;
 
 //Estructura que contiene la informacion para las estadísticas de cada proceso suicida
-struct InfoMuerte {
-	long int seq;
-	int nDecesos;
-};
-/*
-//Estructura para la memoria compartida
-struct MemoriaCompartida {
-	int n; // Numero de procesos controladores
-	long int valSeq;
-	struct InfoMuerte muertes[n]; // Cada entrada identifica la información de los procesos suicidas.
-};
+    struct InfoMuerte {
+        string id;
+        int nDecesos;
+        int muertes[];
+        //Obtener decesos 
+        int getnDecesos(){
+            return nDecesos;
+        }
+        //Obtener id del proceso
+        string getid(){
+            return id;
+        }
+        //Asignar id proceso
+        void setid(string n){
+            id = n;   
+        }
+        //aumentar decesos
+        void setnDeceso(int n){
+            nDecesos = n;   
+        }
 
-sizeof(int)*2+sizeof(InfoMuerte)*n;
-*/
-//Variables para los pipes
-int entrada = 0;
-int salida = 1;
+        void setnDecesos(int n){
+            nDecesos = nDecesos + n;   
+        }
+    };
+    //Estructura para la memoria compartida
+    struct MemoriaCompartida {
+        int n; // Numero de procesos controladores
+        long int valSeq = 0;
+        struct InfoMuerte * muertess = NULL; 
+        
+        void MemoriaCompartidas(int val){
+            n = val;
+            muertess = new struct InfoMuerte[val];
+            if (muertess == NULL){
+                cout << "No se pudo obtener memoria compartida" << endl;
+                exit (0);
+            }   
+        }
+  
+        long int getvalSeq(){return valSeq;} 
+        int getN(){return n;} // Se obtienen el valor de n
+        void setvalSeq(long int n){valSeq = n;}
+        void setN(int val){n = val;}
+        void liberarMemoria(){      
+            delete [] muertess; //Elimina memoria no usada
+            muertess = NULL;
+        }
+    };
+    //Variables para los pipes
+    int entrada = 0;
+    int salida = 1;
 
-//Variables compartidas
-string rutafichero;
-string filename;
-int reencarnacion;
-int idProcesoControl;
-bool murio = false;
-bool suspendido = false;
-bool notificar = false;
-
-vector<int>razonesDeMuerte;
+    //Variables compartidas
+    string rutafichero;
+    string filename;
+    int reencarnacion;
+    int idProcesoControl;
+    bool murio = false;
+    bool suspendido = false;
+    bool notificar = false;
+    //Causas de muerte que se inforrman al usuario
+    vector<int>razonesDeMuerte;
 
 
 sem_t mutex;
@@ -79,7 +114,7 @@ void* HiloControl(void*){
                 int status;
                 waitpid(idHijo,&status,0);
                 //Si llego hasta aqui, significa que el hijo se suicido
-                sleep(5);
+                sleep(5); //5 segundos entre muertes, esto para controlar los suicidios
                 sem_wait(&mutex);
                 if(reencarnacion==0){
                 //Continuar, el hijo vive por siempre
@@ -91,40 +126,26 @@ void* HiloControl(void*){
                     }
                 }
                 notificar = true;
-                razonesDeMuerte.push_back(WEXITSTATUS(status));
+                razonesDeMuerte.push_back(WEXITSTATUS(status)); // Causa de muerte
                 sem_post(&mutex);
             }
         }else{
-            sem_post(&mutex);
+            sem_post(&mutex); //liberar mutex
         }
     }
 }
 
 int main(int argc, char *argv[], char *env[]){
-/*
-    int in = 0;
-    int out = 1;
-    int sup;
-    read(in, &sup, sizeof(sup));
-    sup = sup+1;
-    write(out,&sup,sizeof(sup));
-	return 0;*/
 
     //Se inicia el mutex en 1, usado principalmente para sumar o restar las vidas
     sem_init(&mutex,0,1);
      
-
-    /* Entradas de arg:
-     * --filepath=<rutafichero>
-     * --filename=<fichero>
-     * --reencarnacion=<numero>
-     * <numero del proceso de control
-     */ 
+    //Se obtienen los parámetros que se pasaron desde consola
      
-     rutafichero = argv[1];
-     filename = argv[2];
-     reencarnacion = stoi(argv[3]);
-     idProcesoControl = stoi(argv[4]);
+    rutafichero = argv[1];
+    filename = argv[2];
+    reencarnacion = stoi(argv[3]);
+    idProcesoControl = stoi(argv[4]);
 
      /* Se crea un hilo para encargarse de crear los procesos suicidas mientras
       * que el padre espera comandos de consola
@@ -133,48 +154,17 @@ int main(int argc, char *argv[], char *env[]){
      pthread_create(&hiloControl,NULL,HiloControl,NULL);
      int comando;
      int numeroComando;
-     bool end = false;
-     int exitStatus;
+     bool end = false; //Indica cuando no se reciben comandos
+     int exitStatus; //Estado de muerte
      int vidas;
      int estado;
      int saludar=1;
-     write(salida,&saludar,sizeof(saludar));
      while(!end){
-        //Read/write
-        /*read(entrada,&comando,sizeof(comando));
-        if(comando==0){
-            int msg;
-            sem_wait(&mutex);
-            if(notificar){
-                sem_post(&mutex);
-                msg=1;
-                write(salida,&msg,sizeof(msg));
-                sem_wait(&mutex);
-                exitStatus = razonesDeMuerte.back();
-                razonesDeMuerte.pop_back();
-                vidas = reencarnacion;
-                notificar = false;
-                sem_post(&mutex);
-                write(salida,&exitStatus,sizeof(exitStatus));
-                write(salida,&vidas,sizeof(vidas));
-            }else{
-                if(murio && !notificar){
-                    sem_post(&mutex);
-                    msg=2;
-                    end = true;
-                    write(salida,&msg,sizeof(msg));  
-                }else{
-                    sem_post(&mutex);
-                    msg=3;
-                    write(salida,&msg,sizeof(msg));
-                }
-            }
-        }*/
-        // sem_wait(&mutex);
-        // cerr << "COMANDO " << comando << endl << flush;
-        // sem_post(&mutex);
         read(entrada,&comando,sizeof(comando));
-        switch(comando){
+        switch(comando){ 
+            /*  Se recibe el entero que se pasa, para identificar
+                que comando se paso 
+            */
             //Listar - retornar vidas
             case 1: sem_wait(&mutex);
                     if(suspendido){
@@ -242,8 +232,7 @@ int main(int argc, char *argv[], char *env[]){
                      //Si msg = 1 hay que mandar un mensaje adicional por el pipe
                      //si msg = 3 notifica que el proceso murio 
                      int msg;
-                     //cerr << "ummmm " << reencarnacion << endl << flush;
-
+                     
                      if(notificar){
                         //Hay que mandar mensaje de muerte
                         msg = 1;
@@ -275,7 +264,7 @@ int main(int argc, char *argv[], char *env[]){
         }
         sem_wait(&mutex);
         if(end){
-            sem_post(&mutex);
+            sem_post(&mutex); //Si se llega a esto ya no se reciben comandos
             break;
         }else{
             sem_post(&mutex);

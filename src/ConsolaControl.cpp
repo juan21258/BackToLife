@@ -30,12 +30,6 @@
 
 	using namespace std;
 
-	/*
-	conctrl [--ficheroconfiguracion=<rutaficherocfg>]
-	[--semaforo=<id>]
-	[--memoriacompartida=<id>]
-	*/
-
 	//Enteros para el pipe
 	int entrada = 0;
 	int salida = 1;
@@ -48,9 +42,10 @@
 	vector<string>nombreSuicida;
 	//Vector COMPARTIDO donde se guarda el numero de vidas inicial de cada proceso suicida
 	vector<int>numeroVidas;
-
+	//Vector que contiene los id de los procesos y sus comandos
 	vector<vector<string>>comandoHilos;
-	
+	//Contiene el mensaje de que se obtiene del fichero
+	//Lista los suicidas
 	vector<string>mensajes;
 	int counter = 0;
 	bool end = false;
@@ -67,35 +62,24 @@
 
 	sem_t semMensaje;
 
-	//vector<int>ind;
-	//Estructura que contiene la informacion del proceso suicida
-	struct SuicideProcessInfo
-	{
-		char * key;
-		char * id;
-		char * path;
-		char * filename;
-		char * lifes;
-	};
-
 	//Estructura que contiene la informacion para las estadísticas de cada proceso suicida
 	struct InfoMuerte {
 		string id;
 		int nDecesos;
 		int muertes[];
-
+		//Obtener decesos 
 		int getnDecesos(){
         	return nDecesos;
     	}
-
+    	//Obtener id del proceso
     	string getid(){
     		return id;
     	}
-    
+    	//Asignar id proceso
 	    void setid(string n){
 	    	id = n;   
 	    }
-	    
+	    //aumentar decesos
 	    void setnDeceso(int n){
 	    	nDecesos = n;   
 	    }
@@ -105,17 +89,7 @@
 	    }
 	};
 
-	/*
-	void *p = shmat(shmid,NULL,SHM_RDONLY);
-	int *n = (int *)p;
-	*p = n++;
-	long *valSeq = (long *)p;
-	p = valSeq++;
-	InfoMuerte *InfoMuerte = (InfoMuerte *)p;
 	
-	sizeof(int)+sizeof(long)+n*sizeof(InfoMuerte);
-	*/
-
 	//Estructura para la memoria compartida
 	struct MemoriaCompartida {
 		int n; // Numero de procesos controladores
@@ -129,24 +103,20 @@
 				cout << "No se pudo obtener memoria compartida" << endl;
 				exit (0);
 			}	
-		    //muertess[0].setnDecesos(3);
-		    //muertess[0].setid("Hola");
-		    //muertess[1].setnDecesos(4);
-		    //muertess[1].setid("Holasd");
   		}
-  
+  	
 		long int getvalSeq(){return valSeq;} 
-		int getN(){return n;}
+		int getN(){return n;} // Se obtiene el valor de n
 		void setvalSeq(long int n){valSeq = n;}
 		void setN(int val){n = val;}
 		void liberarMemoria(){      
-    		delete [] muertess;
+    		delete [] muertess; //Elimina memoria no usada
     		muertess = NULL;
   		}
 	};
-
-	MemoriaCompartida cseg;
-
+	//Instancia intermediaria para la memoria compartida
+	MemoriaCompartida cseg; 
+	//Se obtiene todo lo que hay en el fichero de configuración
 	void leerFichero(string ruta){
 	  int i = 1;
 	  int j = 3; //Path
@@ -157,21 +127,16 @@
 	  ifstream myReadFile(ruta);
 	  while (!myReadFile.eof()) {
 	  	getline(myReadFile,infile);
-	  	istringstream iss(infile);
+	  	istringstream iss(infile); //Se obtiene los parámetros
 	  	copy(istream_iterator<string>(iss),
 	  		istream_iterator<string>(),
-	  		back_inserter(param));
+	  		back_inserter(param)); //Se insertan en el vector
 	  }
 	  //ver archivo extraido 
-	  /*
-	  for(vector<string>::const_iterator i = param.begin(); i != param.end(); ++i){
-	    cout << *i << "\n";
-	  }
-	  */
 	  //Prueba de que toma los argumentos
 	  while(i < param.size() && j < param.size() && k < param.size()){
 	  	cout << param.at(i) << " " << param.at(j) << " "<< stoi(param.at(k)) << endl;
-
+	  	//Se asigana a un vector los paramentros de: path, nombre, fichero y vidas
 	  	idProcesos.push_back(param.at(i));
 	  	pathSuicida.push_back(param.at(j)+"/");
 	  	nombreSuicida.push_back(param.at(exec));
@@ -182,7 +147,7 @@
 	  	k=k+8;
 	  	exec=exec+8;
 	  }
-	  myReadFile.close();
+	  myReadFile.close(); //Se cierra el fichero
 	}
 
 	void HiloConsola(int id, int p11, int p12, int p21, int p22){
@@ -200,10 +165,10 @@
 		if(idHijo==0){
 			//Hijo
 			//Conecta salida del pipe1 a su entrada y la entrada del pipe2 a su salida
-			dup2(pipe1[0],0);
-			close(pipe1[1]);
-			dup2(pipe2[1],1);
-			close(pipe2[0]);
+			dup2(pipe1[0],0);//inicializa la entrada para la posición 0 del pipe1
+			close(pipe1[1]); //Cierra la salida
+			dup2(pipe2[1],1);//inicializa la salida para la posición 1 del pipe2
+			close(pipe2[0]);//Cierra la entrada
 			//Inicia el proceso control
 			//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Cambiar direccion
 			string tempPath= pathSuicida[tid];
@@ -236,10 +201,9 @@
 		int estado;
 		string strComando;
 		int test =0;
-		string strEstado;
+		string strEstado; //Estado actual del proceso
         string strInfinito;
 			
-		read(pipe2[0],&test,sizeof(test));
 		sem_post(&mutexPipe);
 		while(!murio){
 			
@@ -258,29 +222,32 @@
 					sem_wait(&mutexCon);
 					cerr << "Proceso suicida " << idProcesos[tid] << " termino por causa: "
 					<< exitStatus << " -- Proceso Control " << tid << " Vidas restantes: " << 
-					vidas << endl;
+					vidas << endl; //Se indica la causa de muerte de un procesos específico
 					for(int i = 0;i < idProcesos.size();i++){
 						if(tid == i){
 							//ind.at(i)++;
 							cseg.muertess[i].setnDecesos(1);
 						}
 					}
-					cseg.valSeq++;
+					cseg.valSeq++; // Se aumentan las muertes totales del sistema
 					sem_post(&mutexCon);
                 }else if(msg==2){
 					read(pipe2[0],&comando,sizeof(comando));
                 	sem_wait(&mutexCon);
-                	murio = true;
-                	cerr << "Proceso: "<<idProcesos[tid]<< " termino." << endl << flush;
-                    sem_post(&mutexCon);
+                	murio = true; //Si muere totalmente se indica que el proceso termina 
+                	cerr << "Proceso: "<<idProcesos[tid]<< " termino." << endl << flush; 
+                    sem_post(&mutexCon); 
                 }
 			}else{
+				//Los read y los write interactuan con proceso control
+				//read: el proceso espera por datos
+				//write: el proceso envia datos
 				sem_wait(&mutexCon);
 				strComando = comandoHilos[tid].back();
 				comandoHilos[tid].pop_back();
 				if(strComando=="listar"){
 					sem_post(&mutexCon);
-					comando = 1;
+					comando = 1; //Se asignan números a los comandos para pasarlo a proceso control
 					write(pipe1[1],&comando,sizeof(comando));
 					read(pipe2[0],&vidas,sizeof(vidas));
 					read(pipe2[0],&estado,sizeof(estado));
@@ -350,14 +317,11 @@
 
 		}
         int status;
-        //waitpid(idHijo,&status,0);
-		// close(pipe1[0]);
-		// close(pipe2[1]);
-        waitpid(idHijo,&status,0);
+        waitpid(idHijo,&status,0); //Se obtiene el estado del hijo
         sem_wait(&mutexCon);
         muertesControl++;
         if(muertesControl == comandoHilos.size()){
-        	
+        	//Se verifica que todos los procesos acabaron
         	cerr << "Total muertes: " << cseg.valSeq << endl << flush;
         	for(int i=0;i<idProcesos.size();i++){
         		cerr << "Muertes "<< cseg.muertess[i].getid() << ": "<< 
@@ -366,9 +330,9 @@
         	cseg.liberarMemoria();
         	cerr << "Todos los procesos han terminado. Presione enter para terminar"
         	<< endl << flush;
-
+        	//Se acaba el programa
         }
-        sem_post(&mutexCon);
+        sem_post(&mutexCon); //Liberar mutex
 		
 	}
 
@@ -376,14 +340,11 @@
 		for (int i = 0; i < idProcesos.size(); ++i)
 		{
 			if(cmd == idProcesos[i]){
-				return i;
+				return i; //Obtener identificadores de procesos
 			}
 		}
 		return -1;
 	}
-
-	//int MemoriaCompartida::n = 254;
-
 
 	int main(int argc, char *argv[], char *env[]){
 
@@ -396,6 +357,7 @@
 		string str_temp;
 		string str_temp2;
 		if(argc <= 4){
+			//Se obtienen los argumentos que ingresa el usuario
 			for(int i=0;i<argc;i++){
 				str_temp = argv[i];
 				str_temp2 = str_temp.substr(0,23); 
@@ -418,16 +380,15 @@
 				}
 			}
 		}
-		else {
+		else { //Se especifica el modo de uso
 			cout << "Modo de uso:"<< endl;	
 			cout << "conctrl [--ficheroconfiguracion=<rutaficherocfg>]" <<
 			"[--semaforo=<id>][--memoriacompartida=<id>] " << endl;
 		}
 
-
+		//Llave memoria
 		key_t key = stoi(memoria);
-		//TESTING
-
+		
 		leerFichero(ruta);
 		int nProcesos = idProcesos.size();
 		cseg.MemoriaCompartidas(nProcesos);
@@ -442,7 +403,7 @@
 		int pipes1[nProcesos][2];
 		int pipes2[nProcesos][2];
 		for (int i = 0; i < nProcesos; ++i)
-		{
+		{//Hilo por cada pipe
 			vector<string>cmd;
 			comandoHilos.push_back(cmd);
 			int pipe1[2];
@@ -471,29 +432,12 @@
 	    	sem_wait(&mutexPipe);
 	    }
 	    
-
-
-
 	    //Espera de comandos de consola
 	    // inicio parser
 	    string line;
 	    vector<string>comando;
 	    int i = 0;
     	try{
-    		/*
-    		while(true){
-    			sem_wait(&mutexCon);
-    			cerr << "hai "<< endl << flush;
-    			sem_post(&mutexCon);
-    		
-    			string x;
-    			getline(cin,x);//cin >> x;
-    		
-    			sem_wait(&mutexCon);
-    			cerr << "got it ! "<< x << endl << flush;
-    			sem_post(&mutexCon);
-    		
-    		}*/
     		//Parser consola
     		while(!cin.eof()){
     			
@@ -503,8 +447,10 @@
     			copy(istream_iterator<string>(iss),
     				istream_iterator<string>(),
     				back_inserter(comando));
+    				//se inserta al vector
     		if(comando.size()>1){		
     			if(comando.at(1)=="*"){
+    				// Comando que se aplica a todos los procesos
     				for (int i = 0; i < nProcesos; ++i){
     					sem_wait(&mutexCon);
     					if(comando.at(0)=="sumar"  || 
@@ -516,6 +462,7 @@
     					sem_post(&mutexCon);
     				}
     			}else{
+    				//Proceso al que se le aplica el comando
     				int id = getTid(comando.at(1));
     				sem_wait(&mutexCon);
 					if(comando.at(0)=="sumar"   || 
@@ -527,10 +474,10 @@
     				sem_post(&mutexCon);
     			}
    			}
-    			comando.clear();
+    			comando.clear(); //Se limpia el vector
     			sem_wait(&mutexCon);
     			if (muertesControl == nProcesos){
-    				break;
+    				break; //Si se acaban todos los procesos se sale el programa
     			}
     			sem_post(&mutexCon);
     		}
@@ -538,7 +485,7 @@
     	}catch(int i){}
 
     	for(int i=0; i < nProcesos; i++){
-    		t[i].join();
+    		t[i].join(); //Se termiann los hilos
     	}
 	return 0;
 }

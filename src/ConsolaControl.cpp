@@ -125,6 +125,10 @@
 		void MemoriaCompartidas(int val){
 			n = val;
 		    muertess = new struct InfoMuerte[val];
+		    if (muertess == NULL){
+				cout << "No se pudo obtener memoria compartida" << endl;
+				exit (0);
+			}	
 		    //muertess[0].setnDecesos(3);
 		    //muertess[0].setid("Hola");
 		    //muertess[1].setnDecesos(4);
@@ -135,6 +139,10 @@
 		int getN(){return n;}
 		void setvalSeq(long int n){valSeq = n;}
 		void setN(int val){n = val;}
+		void liberarMemoria(){      
+    		delete [] muertess;
+    		muertess = NULL;
+  		}
 	};
 
 	MemoriaCompartida cseg;
@@ -355,6 +363,7 @@
         		cerr << "Muertes "<< cseg.muertess[i].getid() << ": "<< 
         		cseg.muertess[i].getnDecesos() << endl <<flush;
         	}
+        	cseg.liberarMemoria();
         	cerr << "Todos los procesos han terminado. Presione enter para terminar"
         	<< endl << flush;
 
@@ -415,6 +424,8 @@
 			"[--semaforo=<id>][--memoriacompartida=<id>] " << endl;
 		}
 
+
+		key_t key = stoi(memoria);
 		//TESTING
 
 		leerFichero(ruta);
@@ -424,6 +435,9 @@
 			cseg.muertess[i].setid(idProcesos.at(i));
 			cseg.muertess[i].setnDeceso(0);
 		}
+
+		int sarray = sizeof(cseg.muertess)/sizeof(*cseg.muertess);
+		int TAM = sizeof(int)+sizeof(long)+sarray*sizeof(InfoMuerte);
 
 		int pipes1[nProcesos][2];
 		int pipes2[nProcesos][2];
@@ -440,7 +454,6 @@
 			pipes2[i][0]=pipe2[0];
 			pipes2[i][1]=pipe2[1];
 		}
-	
 		cerr << "Total procesos: " << nProcesos << endl << flush;
 	    sem_init(&mutexCon,0,1);
 	    sem_init(&mutexPipe,0,0);

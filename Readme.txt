@@ -1,14 +1,14 @@
 Documento del proyecto
 
 Lenguaje:
-La practica se realizo en el lenguaje de programacion C++.
+La práctica se realizó en el lenguaje de programación C++.
 
 Este proyecto en sistema de procesos que pueden volver a la vida (Procesos reencarnantes),
 este tiene una estructura dividida básicamente en 3 partes:
 
-Consola Control: Encarga de mostrar mensajes al usuario sobre el estado de los procesos,
+Consola Control: Se encarga de mostrar mensajes al usuario sobre el estado de los procesos,
 también puede recibir comandos en tiempo de ejecución.
-Proceso Control: Es el encargado de manejar los procesos suicida, de tal manera que este
+Proceso Control: Es el encargado de manejar los procesos suicidas, de tal manera que este
 notifica la causa de muerte de tal forma que se lleve un conteo de muertes del sistema.
 También recibe comandos de consola control los cuales ejecuta sobre un suicida 
 Nota: Hay un proceso controlador por cada proceso suicida
@@ -22,7 +22,7 @@ cantidad de vidas
 Información del proyecto:
 El proyecto utiliza el compilador de C++11.
 
-Algunas de la bibliotecas usadas son:
+Algunas de las bibliotecas usadas son:
 
 <fstream>
 <string.h>

@@ -1,2 +1,0 @@
-ProcesoSui primerSuicida { /home/juan/suicidas :: ProcesoSuicida 10 }
-ProcesoSui eternoSuicida { /home/juan/suicidas :: TendenciasSuicidas 0 }

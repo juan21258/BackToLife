@@ -13,7 +13,7 @@ Paso 1: Inicialización
 
 $ make init 
 
-Esto permite inicializar el directorio bin donde estaran ubicados los archivos de 
+Esto permite inicializar el directorio bin donde estarán ubicados los archivos de 
 configuración que contienen los identificadores de los suicidas, direcciones de ficheros
 del suicida y la cantidad de vidas del suicida
 
@@ -27,11 +27,11 @@ $ make all
 
 Esto compila los ficheros del proyecto, los cuales son 3:
 ConsolaControl.cpp ProcesoControl.cpp ProcesoSuicida.cpp
-Los objetivos o ficheros .o estaran en el directorio bin, el cual fue previamente inicializado
+Los objetivos o ficheros .o estarán en el directorio bin, el cual fue previamente inicializado
 
 Paso 3: Ejecución
 
-estan ubicados en la carpeta backtolife, procederemos a realizar lo siguiente:
+Ubicandonos en la carpeta backtolife, procederemos a realizar lo siguiente:
 
 $ ./bin/conctrl 
 
